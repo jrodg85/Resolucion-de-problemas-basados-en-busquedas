@@ -1,21 +1,25 @@
 # Resolución de problemas basados en búsquedas
 
-## Tarea1: Experimentación de búsqueda en anchura y profundidad
+## Tarea 2: Números
 
-El objetivo de está tarea es el de entender el código del programa adjunto y poder experimentar la búsqueda en anchura y profundidad.
+En esta tarea es necesario que utilices el código de la tarea 1. Crea un problema cuyos estados sean números de tres cifras y las posibles acciones sean sumar o restar una unidad a alguna de las cifras (+1, +10, +100, -1, -10, -100).
 
-Es necesario que se ejecute el código y se tomen los datos de tiempo de ejecución, memoria consumida y cantidad de nodos expandidos para:
+El problema en concreto tendrá una serie de números tabú que deberían de ser imposibles de alcanzar.
 
-- Búsqueda en anchura usando árbol.
-- Búsqueda en anchura usando grafo.
-- Búsqueda en profundidad usando grafo.
-- Búsqueda en profundidad usando árbol.
+Es decir, la definición del problema es la siguiente:
+
+Estado inicial: 789
+Estado Objetivo: 269
+Números tabú: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
+Acciones: +1, +10, +100, -1, -10, -100
+
 
 ## Solución
 
-La tarea a ejecutar es dado un numero inicial A menor que 100, mediante las operaciones (-10,-1,+1,+10) debe de llegar a un numero B objetivo.
+La tarea a ejecutar es dado un numero inicial A menor que 1000 y mayor que 99, mediante las operaciones (-100, -10, -1, +1, +10, +100) debe de llegar a un numero B objetivo menor que 1000 y mayor que 99 objetivo.
 
-En este caso el A= 89, B=43
+En este caso el A= 789, B=269
+No se puede llegar a los siguientes numeros: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
 
 Se va a proceder a modificar el código para que los 4 posibles búsquedas las haga a la vez y se muestre en el código una vez ejecutado. Para ello se pondrá un for in range 4. Se añadirán cabeceras para separar cada uno de los resultados
 
@@ -43,7 +47,7 @@ def humanbytes(B: int) -> str:
     TB = float(KB ** 4)  # 1,099,511,627,776
 
     if B < KB:
-        return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
+        return '{0} {1}'.format(B, 'Bytes' if 0 == B > 1 else 'Byte')
     elif KB <= B < MB:
         return '{0:.2f} KB'.format(B / KB)
     elif MB <= B < GB:
@@ -109,6 +113,7 @@ class Problem:
 
 class Statistics(object):
     amount = 0
+
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(Statistics, cls).__new__(cls)
@@ -284,7 +289,7 @@ class Invented(Problem):
     The actions is to add or subtract some digit (+1, -1, +10, -10)
     """
 
-    def __init__(self, initial=89, goal=43):
+    def __init__(self, initial=789, goal=269):
         """ Define goal state and initialize a problem """
         super().__init__(initial, goal)
 
@@ -293,31 +298,21 @@ class Invented(Problem):
         The result would be a list, since there are only four possible actions
         in any given state of the environment """
 
-        possible_actions = ['+1', '+10', '-1', '-10']
+        actions = [1, 10, 100, -1, -10, -100]
+        tabu = [244, 253, 254, 343, 344, 353, 778, 779, 679, 689]
+        possible_actions = []
 
-        if state == 99:
-            possible_actions.remove('+1')
-        if state >= 90:
-            possible_actions.remove('+10')
-
-        if state < 20:
-            possible_actions.remove('-10')
-        if state == 10:
-            possible_actions.remove('-1')
+        for action in actions:
+            tmp = state + action
+            if 100 <= tmp <= 999 and tmp not in tabu:
+                possible_actions.append(action)
 
         return possible_actions
 
     def result(self, state, action):
         """ Given state and action, return a new state that is the result of the action.
         Action is assumed to be a valid action in the state """
-        tmp = {
-            '+1': 1,
-            '+10': 10,
-            '-1': -1,
-            '-10': -10
-        }
-
-        return state + tmp[action]
+        return state + action
 
     def goal_test(self, state):
         """ Given a state, return True if state is a goal state or False, otherwise """
@@ -326,30 +321,34 @@ class Invented(Problem):
 
 
 if __name__ == '__main__':
-    process = psutil.Process(os.getpid())
-    print('\nMemory usage initially: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-
-    problem: Problem = Invented()
-
-    start = time.process_time()
-    # Refers to the ime the CPU was busy processing the program’s instructions.
-    # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
-    for i in range (3):
-        print("##########################################################")
-        print("# Ejercicio", i+1)
-        print("##########################################################")
+    for i in range(3):
+        process = psutil.Process(os.getpid())
+        print('\nMemory usage initially: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
+    
+        problem: Problem = Invented()
+    
+        start = time.process_time()
+        # Refers to the ime the CPU was busy processing the program’s instructions.
+        # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
         if i==0:
-            print("Búsqueda en anchura usando árbol.")
+            print("############################################")
+            print("Parte ", i+1)
+            print("############################################")
             solution: Optional[Node] = breadth_first_tree_search(problem)
-        elif i==1:
-            print("Búsqueda en anchura usando grafo.")
+        if i==1:
+            print("############################################")
+            print("Parte ", i+1)
+            print("############################################")
             solution: Optional[Node] = breadth_first_graph_search(problem)
-        elif i==2:
-            print("Búsqueda en profundidad usando grafo.")
+        if i==2:
+            print("############################################")
+            print("Parte ", i+1)
+            print("############################################")
             solution: Optional[Node] = depth_first_graph_search(problem)
-        #elif i==3:
-            #print("Búsqueda en profundidad usando grafo.")
-            #print("Se procede a cancelar su ejecución por entrar en bucle infinito")
+        #if i==3:
+            #print("############################################")
+            #print("Parte ", i+1)
+            #print("############################################")
             #solution: Optional[Node] = depth_first_tree_search(problem)
         elapsed = time.process_time() - start
     
@@ -359,9 +358,11 @@ if __name__ == '__main__':
             print("Nodos:", solution.path(), sep='\n\t')
             print("Acciones:", solution.solution(), sep='\n\t')
     
-            print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-        
-        
+        print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
+        print('CPU Execution time: %.6f seconds' % elapsed)
+    print("Fin de la ejecución.")
+
+
         
     print("##########################################################")
     print("# Ejercicio 4")
@@ -372,47 +373,54 @@ if __name__ == '__main__':
 ```
 
     
-    Memory usage initially: 61.09 MB (0.38%)
+    Memory usage initially: 66.16 MB (0.21%)
     
-    ##########################################################
-    # Ejercicio 1
-    ##########################################################
-    Búsqueda en anchura usando árbol.
-    Nodos expandidos:  47569
+    ############################################
+    Parte  1
+    ############################################
+    Nodos expandidos:  1684758
     Profundidad de la solucion:  9
     Nodos:
-    	[<Node 89>, <Node 90>, <Node 91>, <Node 92>, <Node 93>, <Node 83>, <Node 73>, <Node 63>, <Node 53>, <Node 43>]
+    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
     Acciones:
-    	['+1', '+1', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
+    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
     
-    Memory usage finally: 63.41 MB (0.40%)
+    Memory usage finally: 70.35 MB (0.22%)
     
-    ##########################################################
-    # Ejercicio 2
-    ##########################################################
-    Búsqueda en anchura usando grafo.
-    Nodos expandidos:  47631
+    CPU Execution time: 20.234375 seconds
+    
+    Memory usage initially: 70.35 MB (0.22%)
+    
+    ############################################
+    Parte  2
+    ############################################
+    Nodos expandidos:  1685223
     Profundidad de la solucion:  9
     Nodos:
-    	[<Node 89>, <Node 90>, <Node 91>, <Node 92>, <Node 93>, <Node 83>, <Node 73>, <Node 63>, <Node 53>, <Node 43>]
+    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
     Acciones:
-    	['+1', '+1', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
+    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
     
-    Memory usage finally: 63.16 MB (0.40%)
+    Memory usage finally: 69.51 MB (0.22%)
     
-    ##########################################################
-    # Ejercicio 3
-    ##########################################################
-    Búsqueda en profundidad usando grafo.
-    Nodos expandidos:  47662
-    Profundidad de la solucion:  30
+    CPU Execution time: 0.015625 seconds
+    
+    Memory usage initially: 69.51 MB (0.22%)
+    
+    ############################################
+    Parte  3
+    ############################################
+    Nodos expandidos:  1685359
+    Profundidad de la solucion:  128
     Nodos:
-    	[<Node 89>, <Node 79>, <Node 69>, <Node 59>, <Node 49>, <Node 39>, <Node 29>, <Node 19>, <Node 18>, <Node 17>, <Node 16>, <Node 15>, <Node 14>, <Node 13>, <Node 12>, <Node 11>, <Node 21>, <Node 31>, <Node 41>, <Node 51>, <Node 61>, <Node 71>, <Node 81>, <Node 91>, <Node 92>, <Node 93>, <Node 83>, <Node 73>, <Node 63>, <Node 53>, <Node 43>]
+    	[<Node 789>, <Node 788>, <Node 688>, <Node 588>, <Node 488>, <Node 388>, <Node 288>, <Node 188>, <Node 178>, <Node 168>, <Node 158>, <Node 148>, <Node 138>, <Node 128>, <Node 118>, <Node 108>, <Node 107>, <Node 106>, <Node 105>, <Node 104>, <Node 103>, <Node 102>, <Node 101>, <Node 100>, <Node 200>, <Node 190>, <Node 180>, <Node 170>, <Node 160>, <Node 150>, <Node 140>, <Node 130>, <Node 120>, <Node 220>, <Node 219>, <Node 209>, <Node 309>, <Node 299>, <Node 399>, <Node 499>, <Node 599>, <Node 699>, <Node 709>, <Node 708>, <Node 608>, <Node 508>, <Node 408>, <Node 407>, <Node 307>, <Node 297>, <Node 197>, <Node 196>, <Node 186>, <Node 176>, <Node 166>, <Node 156>, <Node 146>, <Node 136>, <Node 126>, <Node 125>, <Node 124>, <Node 123>, <Node 122>, <Node 222>, <Node 212>, <Node 211>, <Node 311>, <Node 301>, <Node 291>, <Node 281>, <Node 271>, <Node 261>, <Node 251>, <Node 241>, <Node 231>, <Node 331>, <Node 330>, <Node 329>, <Node 328>, <Node 327>, <Node 227>, <Node 217>, <Node 216>, <Node 215>, <Node 214>, <Node 314>, <Node 304>, <Node 294>, <Node 194>, <Node 184>, <Node 174>, <Node 164>, <Node 154>, <Node 144>, <Node 143>, <Node 243>, <Node 233>, <Node 333>, <Node 323>, <Node 423>, <Node 413>, <Node 403>, <Node 393>, <Node 383>, <Node 283>, <Node 273>, <Node 263>, <Node 363>, <Node 362>, <Node 352>, <Node 342>, <Node 442>, <Node 432>, <Node 532>, <Node 522>, <Node 512>, <Node 502>, <Node 492>, <Node 482>, <Node 472>, <Node 471>, <Node 461>, <Node 451>, <Node 450>, <Node 350>, <Node 349>, <Node 249>, <Node 259>, <Node 269>]
     Acciones:
-    	['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
+    	[-1, -100, -100, -100, -100, -100, -100, -10, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, -1, -1, -1, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -10, 100, -10, 100, 100, 100, 100, 10, -1, -100, -100, -100, -1, -100, -10, -100, -1, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, 100, -10, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -1, -1, -1, -100, -10, -1, -1, -1, 100, -10, -10, -100, -10, -10, -10, -10, -10, -1, 100, -10, 100, -10, 100, -10, -10, -10, -10, -100, -10, -10, 100, -1, -10, -10, 100, -10, 100, -10, -10, -10, -10, -10, -10, -1, -10, -10, -1, -100, -1, -100, 10, 10]
     
-    Memory usage finally: 63.16 MB (0.40%)
+    Memory usage finally: 69.51 MB (0.22%)
     
+    CPU Execution time: 0.000000 seconds
+    Fin de la ejecución.
     ##########################################################
     # Ejercicio 4
     ##########################################################
@@ -421,23 +429,42 @@ if __name__ == '__main__':
     
 
 ---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+---
+
 
 ## Exposición de los datos obtenidos.
 
 Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso.
 Se descarta directamente `Búsqueda en profundidad usando grafo` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
 
-| | **Búsqueda en anchura usando árbol** | **Búsqueda en anchura usando grafo** | **Búsqueda en profundidad usando grafo** |
+| | **Búsqueda en anchura usando árbol** | <span style="color:red">**Búsqueda en anchura usando grafo**</span> | **Búsqueda en profundidad usando grafo** |
 | --- | --- | --- | --- |
-| Nodos expandidos | ***47569*** | 47631 |47662 |
-| Profundidad de la solución | ***9*** | ***9*** | 30 |
-| Memoria usada finalmente | 63.41 MB | ***63.16 MB*** | ***63.16 MB*** |
+| Nodos expandidos | ***1684758*** | 1685223 | 1685359 |
+| Profundidad de la solución | ***9*** | ***9*** | 128 |
+| Memoria usada finalmente | 70.35 MB | ***69.51 MB*** | ***69.51 MB*** |
+| Tiempo de ejecución de CPU | 20.234375 seconds | 0.015625 seconds | ***0.000000 seconds*** | 
 
 Cabe destacar de los datos obtenidos las siguientes reflexiones:
-- No aparece en los datos sacados por la consola de Python el tiempo de ejecución de cada uno de los tipos de búsqueda, aunque si es importante indicar que el tiempo de todos ellos fueron inmediatos. Por lo que se puede tomar como un dato despreciable.
-- De la misma manera se puede indicar en lo relativo a los nodos expandidos ya que el ahorro de nodos expandidos entre la opción mas optima y la menos optima en este campo de estudio, es solo de un **0.1955%**. Por lo que esta opción como decisiva para su elección no se considera la mas decisiva.
-- Relativo al apartado de la profundidad de la solución, pasa lo contrario que en el apartado anterior, ya que el método de `Búsqueda en profundidad usando grafo` utiliza 3 veces mas la profundidad de la solución que los otros dos métodos, este campo de estudio se puede considerar determinante ya que la diferencia del menos con el mayor es de mas de **300%**, quedando la  opción de `Búsqueda en profundidad usando grafo` como **DESCARTADA**.
-- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **0.3958%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`. 
+
+- Se puede indicar en lo relativo a los nodos expandidos ya que el ahorro de nodos expandidos entre la opción mas optima y la menos optima en este campo de estudio, es solo de un **0.0357%**. Por lo que esta opción como decisiva para su elección no se considera la mas decisiva.
+- Relativo al apartado de la profundidad de la solución, pasa lo contrario que en el apartado anterior, ya que el método de `Búsqueda en profundidad usando grafo` utiliza 3 veces mas la profundidad de la solución que los otros dos métodos, este campo de estudio se puede considerar determinante ya que la diferencia del menos con el mayor es de mas de **1433%**, quedando la  opción de `Búsqueda en profundidad usando grafo` como **DESCARTADA**.
+- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **1.2085%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`. 
+- A modo de re-afirmación, se puede concluir que el tiempo de ejecución diferenciando entre `Búsqueda en anchura usando árbol` y `Búsqueda en anchura usando grafo`, cabe destacar que en `Búsqueda en anchura usando árbol` usa muchísimo mas tiempo de ejecución que `Búsqueda en anchura usando grafo`.
+
 
 
 ---
