@@ -1,33 +1,29 @@
 # Resolución de problemas basados en búsquedas
 
-## Tarea 2: Números
+## Tarea 4. Movimiento del caballo
 
-En esta tarea es necesario que utilices el código de la tarea 1. Crea un problema cuyos estados sean números de tres cifras y las posibles acciones sean sumar o restar una unidad a alguna de las cifras (+1, +10, +100, -1, -10, -100).
+En esta tarea se adjunta un código de ejemplo para ayudar a la realización de la misma.
 
-El problema en concreto tendrá una serie de números tabú que deberían de ser imposibles de alcanzar.
+Esta tarea consiste en probar el algoritmo A\* frente a la búsqueda primero en anchura con grafo. Para ello se va a implementar un tablero de ajedrez en el cual se indicará la posición de inicio de una ficha del caballo y su posición final, para que el algoritmo de búsqueda indique los movimientos que tiene que realizar el caballo.
 
-Es decir, la definición del problema es la siguiente:
+En esta tarea se pide que se implementen dos heurísticas para usar con el algoritmo A\*.
 
-Estado inicial: 789
-Estado Objetivo: 269
-Números tabú: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
-Acciones: +1, +10, +100, -1, -10, -100
+Entregables:
 
+El código con la implementación
+Un documento pdf donde se muestre la comparación entra la búsqueda en anchura y las dos heurísticas implementadas. Para ello es necesario que exista una tabla en la que se indique diferentes profundidades a las que se encuentra la solución y para ellas los nodos expandidos y el tiempo de ejecución.
+Además, en el documento pdf, es necesario que se expliquen en que consisten las heurísticas implementadas.
 
 ## Solución
 
-La tarea a ejecutar es dado un numero inicial A menor que 1000 y mayor que 99, mediante las operaciones (-100, -10, -1, +1, +10, +100) debe de llegar a un numero B objetivo menor que 1000 y mayor que 99 objetivo.
-
-En este caso el A= 789, B=269
-No se puede llegar a los siguientes numeros: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
-
-Se va a proceder a modificar el código para que los 4 posibles búsquedas las haga a la vez y se muestre en el código una vez ejecutado. Para ello se pondrá un for in range 4. Se añadirán cabeceras para separar cada uno de los resultados
-
+Primero de todo se realizará una adaptación del código para el funcionamiento del código facilitado para los movimientos del caballo. Hemos indicado como inicial que el caballo se encuentra en la casilla A1 (0,0) y debe de ir a la casilla H8 (7,7). En la ejecución del código, están comentados todos las ejecuciones excepto la primera, y el resto comentada, pero en la entrega del mismo se irán añadiendo todas las salidas según el método de búsqueda a utilizar. Para que el consumo de recursos sea equitativo, se procederá al borrado de los outputs correspondientes, por otro lado se tendrá un control del consumo de recursos del sistema en caso de que el se consuma excesiva memoria. Las funciones heurísticas a utilizar serán la heurística Manhattan y la heurística Euclídea
 
 ```python
 import os
 import time
+import heapq
 import psutil
+import functools
 
 from collections import deque
 from typing import Optional
@@ -56,6 +52,26 @@ def humanbytes(B: int) -> str:
         return '{0:.2f} GB'.format(B / GB)
     elif TB <= B:
         return '{0:.2f} TB'.format(B / TB)
+
+
+def memoize(fn, slot=None, maxsize=32):
+    """Memoize fn: make it remember the computed value for any argument list.
+    If slot is specified, store result in that slot of first argument.
+    If slot is false, use lru_cache for caching the values."""
+    if slot:
+        def memoized_fn(obj, *args):
+            if hasattr(obj, slot):
+                return getattr(obj, slot)
+            else:
+                val = fn(obj, *args)
+                setattr(obj, slot, val)
+                return val
+    else:
+        @functools.lru_cache(maxsize=maxsize)
+        def memoized_fn(*args):
+            return fn(*args)
+
+    return memoized_fn
 
 
 class Problem:
@@ -198,6 +214,69 @@ class Node:
 
 
 # ______________________________________________________________________________
+# Queues: Stack, FIFOQueue, PriorityQueue
+# Stack and FIFOQueue are implemented as list and collection.deque
+# PriorityQueue is implemented here
+
+
+class PriorityQueue:
+    """A Queue in which the minimum (or maximum) element (as determined by f and
+    order) is returned first.
+    If order is 'min', the item with minimum f(x) is
+    returned first; if order is 'max', then it is the item with maximum f(x).
+    Also supports dict-like lookup."""
+
+    def __init__(self, order='min', f=lambda x: x):
+        self.heap = []
+        if order == 'min':
+            self.f = f
+        elif order == 'max':  # now item with max f(x)
+            self.f = lambda x: -f(x)  # will be popped first
+        else:
+            raise ValueError("Order must be either 'min' or 'max'.")
+
+    def append(self, item):
+        """Insert item at its correct position."""
+        heapq.heappush(self.heap, (self.f(item), item))
+
+    def extend(self, items):
+        """Insert each item in items at its correct position."""
+        for item in items:
+            self.append(item)
+
+    def pop(self):
+        """Pop and return the item (with min or max f(x) value)
+        depending on the order."""
+        if self.heap:
+            return heapq.heappop(self.heap)[1]
+        else:
+            raise Exception('Trying to pop from empty PriorityQueue.')
+
+    def __len__(self):
+        """Return current capacity of PriorityQueue."""
+        return len(self.heap)
+
+    def __contains__(self, key):
+        """Return True if the key is in PriorityQueue."""
+        return any([item == key for _, item in self.heap])
+
+    def __getitem__(self, key):
+        """Returns the first value associated with key in PriorityQueue.
+        Raises KeyError if key is not present."""
+        for value, item in self.heap:
+            if item == key:
+                return value
+        raise KeyError(str(key) + " is not in the priority queue")
+
+    def __delitem__(self, key):
+        """Delete the first occurrence of key."""
+        try:
+            del self.heap[[item == key for _, item in self.heap].index(True)]
+        except ValueError:
+            raise KeyError(str(key) + " is not in the priority queue")
+        heapq.heapify(self.heap)
+
+# ______________________________________________________________________________
 # Uninformed Search algorithms
 
 
@@ -279,17 +358,55 @@ def breadth_first_graph_search(problem):
                 frontier.append(child)
     return None
 
+
+def best_first_graph_search(problem, f, display=False):
+    """Search the nodes with the lowest f scores first.
+    You specify the function f(node) that you want to minimize; for example,
+    if f is a heuristic estimate to the goal, then we have greedy best
+    first search; if f is node.depth then we have breadth-first search.
+    There is a subtlety: the line "f = memoize(f, 'f')" means that the f
+    values will be cached on the nodes as they are computed. So after doing
+    a best first search you can examine the f values of the path returned."""
+    f = memoize(f, 'f')
+    node = Node(problem.initial)
+    frontier = PriorityQueue('min', f)
+    frontier.append(node)
+    explored = set()
+    while frontier:
+        node = frontier.pop()
+        if problem.goal_test(node.state):
+            if display:
+                print(len(explored), "paths have been expanded and", len(frontier), "paths remain in the frontier")
+            return node
+        explored.add(node.state)
+        for child in node.expand(problem):
+            if child.state not in explored and child not in frontier:
+                frontier.append(child)
+            elif child in frontier:
+                if f(child) < frontier[child]:
+                    del frontier[child]
+                    frontier.append(child)
+    return None
+
+
+def astar_search(problem, h=None, display=False):
+    """A* search is best-first graph search with f(n) = g(n)+h(n).
+    You need to specify the h function when you call astar_search, or
+    else in your Problem subclass."""
+    h = memoize(h or problem.h, 'h')
+    return best_first_graph_search(problem, lambda n: n.path_cost + h(n), display)
+
 # ______________________________________________________________________________
 
 
 class Invented(Problem):
     """
     Example of implementation of the problem.
-    The states are two digits (from 10 to 99)
-    The actions is to add or subtract some digit (+1, -1, +10, -10)
+    The states are three digits (from 100 to 999)
+    The actions is to add or subtract some digit (+1, -1, +10, -10, +100, -100)
     """
 
-    def __init__(self, initial=789, goal=269):
+    def __init__(self, initial=(0,0), goal=(7, 7)):
         """ Define goal state and initialize a problem """
         super().__init__(initial, goal)
 
@@ -298,177 +415,314 @@ class Invented(Problem):
         The result would be a list, since there are only four possible actions
         in any given state of the environment """
 
-        actions = [1, 10, 100, -1, -10, -100]
-        tabu = [244, 253, 254, 343, 344, 353, 778, 779, 679, 689]
         possible_actions = []
+        moves = [(2, 1), (1, 2), (-1, 2), (-2, 1),
+                 (-2, -1), (-1, -2), (1, -2), (2, -1)]
 
-        for action in actions:
-            tmp = state + action
-            if 100 <= tmp <= 999 and tmp not in tabu:
-                possible_actions.append(action)
-
+        for move in moves:
+            x = state[0] + move[0]
+            y = state[1] + move[1]
+            if 0 <= x < 8 and 0 <= y < 8:
+                possible_actions.append(move)
         return possible_actions
 
     def result(self, state, action):
         """ Given state and action, return a new state that is the result of the action.
         Action is assumed to be a valid action in the state """
-        return state + action
+        x = state[0] + action[0]
+        y = state[1] + action[1]
+        return x, y
+
 
     def goal_test(self, state):
         """ Given a state, return True if state is a goal state or False, otherwise """
 
         return state == self.goal
 
+    def h(self, node):
+        """ Return the heuristic value for a given state. Default heuristic function used is
+        h(n) = number of misplaced tiles """
+
+        state = str(node.state)
+        goal = str(self.goal)
+
+        tmp = 0
+        for cnt in range(3):
+            tmp += abs(int(state[cnt]) - int(goal[cnt]))
+
+        return tmp
+
+    # Ahora aplicaremos funcion Euristica Manhattan
+    def manhattan(self, node):
+        deltaX = abs(node.state[0] - self.goal[0])
+        deltaY = abs(node.state[1] - self.goal[1])
+        return deltaX + deltaY
+
+    # Ahora aplicaremos funcion Euristica Euclidea
+    def euclidea(self, node):
+        deltaX = abs(node.state[0] - self.goal[0])
+        deltaY = abs(node.state[1] - self.goal[1])
+        return (deltaX ** 2 + deltaY ** 2) ** 0.5
 
 if __name__ == '__main__':
-    for i in range(3):
-        process = psutil.Process(os.getpid())
-        print('\nMemory usage initially: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-    
-        problem: Problem = Invented()
-    
-        start = time.process_time()
-        # Refers to the ime the CPU was busy processing the program’s instructions.
-        # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
-        if i==0:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = breadth_first_tree_search(problem)
-        if i==1:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = breadth_first_graph_search(problem)
-        if i==2:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = depth_first_graph_search(problem)
-        #if i==3:
-            #print("############################################")
-            #print("Parte ", i+1)
-            #print("############################################")
-            #solution: Optional[Node] = depth_first_tree_search(problem)
-        elapsed = time.process_time() - start
-    
-        if solution is not None:
-            print("Nodos expandidos: ", Statistics().get_amount())
-            print("Profundidad de la solucion: ", solution.depth)
-            print("Nodos:", solution.path(), sep='\n\t')
-            print("Acciones:", solution.solution(), sep='\n\t')
-    
-        print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-        print('CPU Execution time: %.6f seconds' % elapsed)
-    print("Fin de la ejecución.")
+    process = psutil.Process(os.getpid())
+    mem_before = process.memory_info().rss
 
 
-        
-    print("##########################################################")
-    print("# Ejercicio 4")
-    print("##########################################################")
-        
-    print("Búsqueda en profundidad usando grafo.")
-    print("Se procede a cancelar su ejecución por entrar en bucle infinito.")
+    problem: Problem = Invented()
+
+    start = time.process_time()
+    # Refers to the ime the CPU was busy processing the program’s instructions.
+    # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
+    solution: Optional[Node] = breadth_first_tree_search(problem)
+    #solution: Optional[Node] = breadth_first_graph_search(problem)
+    #solution: Optional[Node] = astar_search(problem, problem.manhattan)
+    #solution: Optional[Node] = astar_search(problem, problem.euclidea)
+
+    elapsed = time.process_time() - start
+
+    if solution is not None:
+        print("Nodos expandidos: ", Statistics().get_amount())
+        print("Profundidad de la solución: ", solution.depth)
+        print("Nodos:", solution.path(), sep='\n\t')
+        print("Acciones:", solution.solution(), sep='\n\t')
+
+    # print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent()))
+    print('\nMemory usage: %s\n' % humanbytes(process.memory_info().rss - mem_before))
+    print('CPU Execution time: %.6f seconds' % elapsed)
+
+
+
 ```
 
-    
-    Memory usage initially: 66.16 MB (0.21%)
-    
-    ############################################
-    Parte  1
-    ############################################
-    Nodos expandidos:  1684758
-    Profundidad de la solucion:  9
+```
+
+
+#####################################################
+#       Búsqueda en profundidad usando árbol        #
+#####################################################
+
+    Nodos expandidos:  2838
+
+    Profundidad de la solución:  6
+
     Nodos:
-    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
+    	[<Node (0, 0)>, <Node (2, 1)>, <Node (4, 2)>, <Node (6, 3)>, <Node (7, 5)>, <Node (5, 6)>, <Node (7, 7)>]
+
     Acciones:
-    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
-    
-    Memory usage finally: 70.35 MB (0.22%)
-    
-    CPU Execution time: 20.234375 seconds
-    
-    Memory usage initially: 70.35 MB (0.22%)
-    
-    ############################################
-    Parte  2
-    ############################################
-    Nodos expandidos:  1685223
-    Profundidad de la solucion:  9
-    Nodos:
-    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
-    Acciones:
-    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
-    
-    Memory usage finally: 69.51 MB (0.22%)
-    
-    CPU Execution time: 0.015625 seconds
-    
-    Memory usage initially: 69.51 MB (0.22%)
-    
-    ############################################
-    Parte  3
-    ############################################
-    Nodos expandidos:  1685359
-    Profundidad de la solucion:  128
-    Nodos:
-    	[<Node 789>, <Node 788>, <Node 688>, <Node 588>, <Node 488>, <Node 388>, <Node 288>, <Node 188>, <Node 178>, <Node 168>, <Node 158>, <Node 148>, <Node 138>, <Node 128>, <Node 118>, <Node 108>, <Node 107>, <Node 106>, <Node 105>, <Node 104>, <Node 103>, <Node 102>, <Node 101>, <Node 100>, <Node 200>, <Node 190>, <Node 180>, <Node 170>, <Node 160>, <Node 150>, <Node 140>, <Node 130>, <Node 120>, <Node 220>, <Node 219>, <Node 209>, <Node 309>, <Node 299>, <Node 399>, <Node 499>, <Node 599>, <Node 699>, <Node 709>, <Node 708>, <Node 608>, <Node 508>, <Node 408>, <Node 407>, <Node 307>, <Node 297>, <Node 197>, <Node 196>, <Node 186>, <Node 176>, <Node 166>, <Node 156>, <Node 146>, <Node 136>, <Node 126>, <Node 125>, <Node 124>, <Node 123>, <Node 122>, <Node 222>, <Node 212>, <Node 211>, <Node 311>, <Node 301>, <Node 291>, <Node 281>, <Node 271>, <Node 261>, <Node 251>, <Node 241>, <Node 231>, <Node 331>, <Node 330>, <Node 329>, <Node 328>, <Node 327>, <Node 227>, <Node 217>, <Node 216>, <Node 215>, <Node 214>, <Node 314>, <Node 304>, <Node 294>, <Node 194>, <Node 184>, <Node 174>, <Node 164>, <Node 154>, <Node 144>, <Node 143>, <Node 243>, <Node 233>, <Node 333>, <Node 323>, <Node 423>, <Node 413>, <Node 403>, <Node 393>, <Node 383>, <Node 283>, <Node 273>, <Node 263>, <Node 363>, <Node 362>, <Node 352>, <Node 342>, <Node 442>, <Node 432>, <Node 532>, <Node 522>, <Node 512>, <Node 502>, <Node 492>, <Node 482>, <Node 472>, <Node 471>, <Node 461>, <Node 451>, <Node 450>, <Node 350>, <Node 349>, <Node 249>, <Node 259>, <Node 269>]
-    Acciones:
-    	[-1, -100, -100, -100, -100, -100, -100, -10, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, -1, -1, -1, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -10, 100, -10, 100, 100, 100, 100, 10, -1, -100, -100, -100, -1, -100, -10, -100, -1, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, 100, -10, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -1, -1, -1, -100, -10, -1, -1, -1, 100, -10, -10, -100, -10, -10, -10, -10, -10, -1, 100, -10, 100, -10, 100, -10, -10, -10, -10, -100, -10, -10, 100, -1, -10, -10, 100, -10, 100, -10, -10, -10, -10, -10, -10, -1, -10, -10, -1, -100, -1, -100, 10, 10]
-    
-    Memory usage finally: 69.51 MB (0.22%)
-    
-    CPU Execution time: 0.000000 seconds
-    Fin de la ejecución.
-    ##########################################################
-    # Ejercicio 4
-    ##########################################################
-    Búsqueda en profundidad usando grafo.
-    Se procede a cancelar su ejecución por entrar en bucle infinito.
-    
+    	[(2, 1), (2, 1), (2, 1), (1, 2), (-2, 1), (2, 1)]
+
+    Memory usage: 768.00 KB
+
+    CPU Execution time: 0.037188 seconds
+
+#####################################################
+#       Búsqueda en profundidad usando grafo        #
+#####################################################
+
+Nodos expandidos:  55
+
+Profundidad de la solución:  6
+
+Nodos:
+	[<Node (0, 0)>, <Node (2, 1)>, <Node (4, 2)>, <Node (6, 3)>, <Node (7, 5)>, <Node (5, 6)>, <Node (7, 7)>]
+
+Acciones:
+	[(2, 1), (2, 1), (2, 1), (1, 2), (-2, 1), (2, 1)]
+
+Memory usage: 0.0 Byte
+
+CPU Execution time: 0.001044 seconds
+
+
+#####################################################
+#              Heurística Manhattan                  #
+#####################################################
+
+Nodos expandidos:  13
+
+Profundidad de la solución:  6
+
+Nodos:
+	[<Node (0, 0)>, <Node (1, 2)>, <Node (2, 4)>, <Node (4, 5)>, <Node (3, 7)>, <Node (5, 6)>, <Node (7, 7)>]
+
+Acciones:
+	[(1, 2), (1, 2), (2, 1), (-1, 2), (2, -1), (2, 1)]
+
+Memory usage: 0.0 Byte
+
+CPU Execution time: 0.000682 seconds
+
+#####################################################
+#              Heurística Euclídea                  #
+#####################################################
+
+Nodos expandidos:  13
+
+Profundidad de la solución:  6
+
+Nodos:
+	[<Node (0, 0)>, <Node (1, 2)>, <Node (3, 3)>, <Node (5, 4)>, <Node (7, 5)>, <Node (5, 6)>, <Node (7, 7)>]
+
+Acciones:
+	[(1, 2), (2, 1), (2, 1), (2, 1), (-2, 1), (2, 1)]
+
+Memory usage: 0.0 Byte
+
+CPU Execution time: 0.000613 seconds
+
+
+```
 
 ---
----
----
----
----
----
----
----
----
----
----
----
----
----
----
+
 ---
 
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
 
 ## Exposición de los datos obtenidos.
 
 Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso.
 Se descarta directamente `Búsqueda en profundidad usando grafo` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
 
-| | **Búsqueda en anchura usando árbol** | <span style="color:red">**Búsqueda en anchura usando grafo**</span> | **Búsqueda en profundidad usando grafo** |
-| --- | --- | --- | --- |
-| Nodos expandidos | ***1684758*** | 1685223 | 1685359 |
-| Profundidad de la solución | ***9*** | ***9*** | 128 |
-| Memoria usada finalmente | 70.35 MB | ***69.51 MB*** | ***69.51 MB*** |
-| Tiempo de ejecución de CPU | 20.234375 seconds | 0.015625 seconds | ***0.000000 seconds*** | 
+|                            | **Búsqueda en anchura usando árbol** | **Búsqueda en anchura usando grafo** | <span style="color:green">**Heurística Manhattan**</span> | <span style="color:green">**Heurística Euclídea**</span> |
+| -------------------------- | ------------------------------------ | ------------------------------------ | --------------------------------------------------------- | -------------------------------------------------------- |
+| Nodos expandidos           | 2838                                 | 55                                   | **13**                                                    | **13**                                                   |
+| Profundidad de la solución | **6**                                | **6**                                | **6**                                                     | **6**                                                    |
+| Memoria usada finalmente   | 768.00 KB                            | **0.0 Byte**                         | **0.0 Byte**                                              | **0.0 Byte**                                             |
+| Tiempo de ejecución de CPU | 0.037188 seconds                     | 0.001044 seconds                     | 0.000682 seconds                                          | **0.000613 seconds**                                     |
 
 Cabe destacar de los datos obtenidos las siguientes reflexiones:
-
-- Se puede indicar en lo relativo a los nodos expandidos ya que el ahorro de nodos expandidos entre la opción mas optima y la menos optima en este campo de estudio, es solo de un **0.0357%**. Por lo que esta opción como decisiva para su elección no se considera la mas decisiva.
-- Relativo al apartado de la profundidad de la solución, pasa lo contrario que en el apartado anterior, ya que el método de `Búsqueda en profundidad usando grafo` utiliza 3 veces mas la profundidad de la solución que los otros dos métodos, este campo de estudio se puede considerar determinante ya que la diferencia del menos con el mayor es de mas de **1433%**, quedando la  opción de `Búsqueda en profundidad usando grafo` como **DESCARTADA**.
-- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **1.2085%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`. 
-- A modo de re-afirmación, se puede concluir que el tiempo de ejecución diferenciando entre `Búsqueda en anchura usando árbol` y `Búsqueda en anchura usando grafo`, cabe destacar que en `Búsqueda en anchura usando árbol` usa muchísimo mas tiempo de ejecución que `Búsqueda en anchura usando grafo`.
-
-
+La cantidad de nodos expandidos, en este caso va a determinar un factor excluyente para los dos métodos de búsqueda en anchura ya que es muy superior la expansion de estos comparados con los métodos Heurísticos. Quedando solamente las búsquedas Heurísticas, solo destacar que tienen unis datos muy similares incluso en tiempo, puede deberse en este caso a que el valor de la distancia es muy corta en este caso, y debería de probarse cual es mas rápido por ejemplo en otros ejercicios como el mapa de carreteras de Rumanía.
 
 ---
 
 ## Conclusión
 
-Como conclusión al estudio de datos obtenidos y las reflexiones realizadas, se puede determinar que el método de **Búsqueda en anchura usando grafo** es el más eficiente de los 4 que se han realizado.
+Como conclusión al estudio de datos obtenidos y las reflexiones realizadas, se puede determinar que los método de **Heurística Manhattan** y **Heurística Euclídea** son los mas eficientes de los 4 que se han realizado para el caso del ajedrez.
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+## Heurística Manhattan.
+
+El método de búsqueda heurística Manhattan, también conocido como búsqueda por distancia de Manhattan, es una técnica utilizada en algoritmos de búsqueda que se basa en una heurística que calcula la distancia en términos de cuadras o manzanas entre dos puntos en una cuadrícula.
+
+En este método, cada nodo en un grafo está representado por una ubicación en una cuadrícula. La heurística Manhattan calcula la distancia entre dos nodos, sumando las distancias de los componentes horizontal y vertical entre las dos ubicaciones. En otras palabras, la distancia Manhattan es la suma de las distancias de la fila y la columna entre dos nodos.
+
+Por ejemplo, si un nodo está en la ubicación (2,3) y otro nodo está en la ubicación (5,7), la distancia Manhattan entre ellos sería |5-2| + |7-3| = 3 + 4 = 7.
+
+La búsqueda heurística Manhattan utiliza esta heurística para guiar la búsqueda de una solución óptima. En lugar de explorar todos los nodos posibles en un grafo, el algoritmo se enfoca en los nodos que se espera que sean más prometedores en términos de distancia Manhattan a la solución deseada.
+
+Este método es especialmente útil en problemas de búsqueda en laberintos o mapas, donde la distancia Manhattan es una buena medida de la distancia real que se necesita para llegar a un destino. El algoritmo de búsqueda heurística Manhattan puede ser más rápido y eficiente que otros métodos de búsqueda exhaustiva, como la búsqueda en profundidad o la búsqueda en anchura, porque se enfoca en nodos prometedores y evita explorar caminos poco prometedores.
+
+## Heurística Euclidea.
+
+El método de búsqueda heurística Euclídea, también conocido como búsqueda por distancia Euclídea, es una técnica utilizada en algoritmos de búsqueda que se basa en una heurística que calcula la distancia euclidiana entre dos puntos en un espacio n-dimensional.
+
+En este método, cada nodo en un grafo está representado por una ubicación en un espacio n-dimensional. La heurística Euclídea calcula la distancia entre dos nodos utilizando la fórmula de la distancia euclidiana, que es la raíz cuadrada de la suma de los cuadrados de las diferencias de las componentes entre las dos ubicaciones. En otras palabras, la distancia euclidiana es la distancia en línea recta entre dos nodos.
+
+Por ejemplo, si un nodo está en la ubicación (2,3) y otro nodo está en la ubicación (5,7), la distancia euclidiana entre ellos sería sqrt((5-2)^2 + (7-3)^2) = sqrt(9+16) = sqrt(25) = 5.
+
+La búsqueda heurística Euclídea utiliza esta heurística para guiar la búsqueda de una solución óptima. En lugar de explorar todos los nodos posibles en un grafo, el algoritmo se enfoca en los nodos que se espera que sean más prometedores en términos de distancia Euclídea a la solución deseada.
+
+Este método es especialmente útil en problemas de búsqueda en espacios n-dimensionales, donde la distancia Euclídea es una buena medida de la distancia real que se necesita para llegar a un destino. El algoritmo de búsqueda heurística Euclídea puede ser más rápido y eficiente que otros métodos de búsqueda exhaustiva, como la búsqueda en profundidad o la búsqueda en anchura, porque se enfoca en nodos prometedores y evita explorar caminos poco prometedores.
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+
+
+## Conclusiones de ambos métodos.
+
+La gran diferencia entre los métodos de búsqueda heurística Manhattan y Euclídea es la forma en que calculan la distancia entre dos nodos en un grafo.
+
+Mientras que la búsqueda heurística Manhattan utiliza la distancia de Manhattan, que se basa en la suma de las distancias horizontales y verticales entre dos nodos, la búsqueda heurística Euclídea utiliza la distancia euclidiana, que es la distancia en línea recta entre dos nodos.
+
+La elección del método de búsqueda heurística dependerá del problema específico que se está abordando y de la naturaleza de los nodos en el grafo. En general, si los nodos en el grafo están ubicados en una cuadrícula, como en un laberinto o un mapa de la ciudad, la búsqueda heurística Manhattan puede ser más apropiada porque la distancia de Manhattan es una buena medida de la distancia real que se necesita para llegar a un destino. Si los nodos en el grafo están ubicados en un espacio continuo, la búsqueda heurística Euclídea puede ser más apropiada porque la distancia euclidiana es una buena medida de la distancia real entre dos puntos en el espacio.
+
+En resumen, la diferencia clave entre los métodos de búsqueda heurística Manhattan y Euclídea es la forma en que se calcula la distancia entre dos nodos en un grafo, y la elección del método dependerá de la naturaleza del problema y de los nodos en el grafo.

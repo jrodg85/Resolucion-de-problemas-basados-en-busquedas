@@ -38,3 +38,11 @@ Entregables:
 - Se tomen las métricas de tiempos de consumo y de memoria para la búsqueda de primero en anchura para los estados iniciales definidos utilizando árboles.
 - Lo mismo que el punto anterior pero utilizando grafos en lugar de árboles.
 
+## Tarea 4. Movimiento del caballo
+
+En esta tarea se adjunta un código de ejemplo para ayudar a la realización de la misma.
+
+Esta tarea consiste en probar el algoritmo A\* frente a la búsqueda primero en anchura con grafo. Para ello se va a implementar un tablero de ajedrez en el cual se indicará la posición de inicio de una ficha del caballo y su posición final, para que el algoritmo de búsqueda indique los movimientos que tiene que realizar el caballo.
+
+En esta tarea se pide que se implementen dos heurísticas para usar con el algoritmo A\*.
+s
