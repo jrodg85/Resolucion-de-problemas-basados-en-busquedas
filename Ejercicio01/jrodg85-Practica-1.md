@@ -676,7 +676,7 @@ if __name__ == '__main__':
 
         
     print("##########################################################")
-    print("# Ejercicio 4")
+    print("# Parte 4")
     print("##########################################################")
         
     print("Búsqueda en profundidad usando grafo.")
@@ -684,7 +684,7 @@ if __name__ == '__main__':
 ```
 
     
-    Memory usage initially: 31.45 MB (0.10%)
+    Memory usage initially: 62.33 MB (0.39%)
     
     ############################################
     Parte  1
@@ -696,11 +696,11 @@ if __name__ == '__main__':
     Acciones:
     	['+1', '+1', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
     
-    Memory usage finally: 62.24 MB (0.19%)
+    Memory usage finally: 64.20 MB (0.40%)
     
-    CPU Execution time: 0.375000 seconds
+    CPU Execution time: 0.289492 seconds
     
-    Memory usage initially: 62.24 MB (0.19%)
+    Memory usage initially: 64.20 MB (0.40%)
     
     ############################################
     Parte  2
@@ -712,11 +712,11 @@ if __name__ == '__main__':
     Acciones:
     	['+1', '+1', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
     
-    Memory usage finally: 62.25 MB (0.19%)
+    Memory usage finally: 63.95 MB (0.40%)
     
-    CPU Execution time: 0.000000 seconds
+    CPU Execution time: 0.000374 seconds
     
-    Memory usage initially: 62.25 MB (0.19%)
+    Memory usage initially: 63.95 MB (0.40%)
     
     ############################################
     Parte  3
@@ -728,11 +728,11 @@ if __name__ == '__main__':
     Acciones:
     	['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
     
-    Memory usage finally: 62.25 MB (0.19%)
+    Memory usage finally: 63.95 MB (0.40%)
     
-    CPU Execution time: 0.000000 seconds
+    CPU Execution time: 0.000258 seconds
     
-    Memory usage initially: 62.25 MB (0.19%)
+    Memory usage initially: 63.95 MB (0.40%)
     
     Nodos expandidos:  47662
     Profundidad de la solucion:  30
@@ -741,16 +741,32 @@ if __name__ == '__main__':
     Acciones:
     	['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+10', '+1', '+1', '-10', '-10', '-10', '-10', '-10']
     
-    Memory usage finally: 62.25 MB (0.19%)
+    Memory usage finally: 63.95 MB (0.40%)
     
-    CPU Execution time: 0.000000 seconds
+    CPU Execution time: 0.000001 seconds
     Fin de la ejecución.
     ##########################################################
-    # Ejercicio 4
+    # Parte 4
     ##########################################################
     Búsqueda en profundidad usando grafo.
     Se procede a cancelar su ejecución por entrar en bucle infinito.
-    
+
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
 
 ---
 
@@ -817,20 +833,20 @@ if __name__ == '__main__':
 ## Exposición de los datos obtenidos.
 
 Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso.
-Se descarta directamente `Búsqueda en profundidad usando grafo` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
+Se descarta directamente `Búsqueda en profundidad usando árbol` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
 
 | | **Búsqueda en anchura usando árbol** | <span style="color:red">**Búsqueda en anchura usando grafo**</span> | **Búsqueda en profundidad usando grafo** |
 | --- | --- | --- | --- |
 | Nodos expandidos | ***47569*** | 47631 |47662 |
 | Profundidad de la solución | ***9*** | ***9*** | 30 |
-| Memoria usada finalmente | 63.41 MB | ***63.16 MB*** | ***63.16 MB*** |
-| Tiempo de ejecución de CPU | 0.375000 seconds | ***0.000000 seconds*** | ***0.000000 seconds*** | 
+| Memoria usada finalmente | 64.20 MB | ***63.95 MB** | ***63.95 MB*** |
+| Tiempo de ejecución de CPU | 0.289492 seconds | *0.000258 seconds* | ***0.000001 seconds*** |
 
 Cabe destacar de los datos obtenidos las siguientes reflexiones:
 
 - Se puede indicar en lo relativo a los nodos expandidos ya que el ahorro de nodos expandidos entre la opción mas optima y la menos optima en este campo de estudio, es solo de un **0.1955%**. Por lo que esta opción como decisiva para su elección no se considera la mas decisiva.
 - Relativo al apartado de la profundidad de la solución, pasa lo contrario que en el apartado anterior, ya que el método de `Búsqueda en profundidad usando grafo` utiliza 3 veces mas la profundidad de la solución que los otros dos métodos, este campo de estudio se puede considerar determinante ya que la diferencia del menos con el mayor es de mas de **300%**, quedando la  opción de `Búsqueda en profundidad usando grafo` como **DESCARTADA**.
-- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **0.3958%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`. 
+- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **0.3958%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`.
 - A modo de re-afirmación, se puede concluir que el tiempo de ejecución diferenciando entre `Búsqueda en anchura usando árbol` y `Búsqueda en anchura usando grafo`, cabe destacar que en `Búsqueda en anchura usando árbol` usa muchísimo mas tiempo de ejecución que `Búsqueda en anchura usando grafo`.
 
 

@@ -365,7 +365,7 @@ if __name__ == '__main__':
 
         
     print("##########################################################")
-    print("# Ejercicio 4")
+    print("# Parte 4")
     print("##########################################################")
         
     print("Búsqueda en profundidad usando grafo.")
@@ -373,7 +373,7 @@ if __name__ == '__main__':
 ```
 
     
-    Memory usage initially: 66.16 MB (0.21%)
+    Memory usage initially: 61.05 MB (0.38%)
     
     ############################################
     Parte  1
@@ -385,11 +385,11 @@ if __name__ == '__main__':
     Acciones:
     	[1, -10, -10, -1, -100, -100, -100, -100, -100]
     
-    Memory usage finally: 70.35 MB (0.22%)
+    Memory usage finally: 100.46 MB (0.63%)
     
-    CPU Execution time: 20.234375 seconds
+    CPU Execution time: 15.275921 seconds
     
-    Memory usage initially: 70.35 MB (0.22%)
+    Memory usage initially: 100.46 MB (0.63%)
     
     ############################################
     Parte  2
@@ -401,11 +401,11 @@ if __name__ == '__main__':
     Acciones:
     	[1, -10, -10, -1, -100, -100, -100, -100, -100]
     
-    Memory usage finally: 69.51 MB (0.22%)
+    Memory usage finally: 99.54 MB (0.63%)
     
-    CPU Execution time: 0.015625 seconds
+    CPU Execution time: 0.014522 seconds
     
-    Memory usage initially: 69.51 MB (0.22%)
+    Memory usage initially: 99.54 MB (0.63%)
     
     ############################################
     Parte  3
@@ -417,46 +417,225 @@ if __name__ == '__main__':
     Acciones:
     	[-1, -100, -100, -100, -100, -100, -100, -10, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, -1, -1, -1, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -10, 100, -10, 100, 100, 100, 100, 10, -1, -100, -100, -100, -1, -100, -10, -100, -1, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, 100, -10, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -1, -1, -1, -100, -10, -1, -1, -1, 100, -10, -10, -100, -10, -10, -10, -10, -10, -1, 100, -10, 100, -10, 100, -10, -10, -10, -10, -100, -10, -10, 100, -1, -10, -10, 100, -10, 100, -10, -10, -10, -10, -10, -10, -1, -10, -10, -1, -100, -1, -100, 10, 10]
     
-    Memory usage finally: 69.51 MB (0.22%)
+    Memory usage finally: 99.54 MB (0.63%)
     
-    CPU Execution time: 0.000000 seconds
+    CPU Execution time: 0.007187 seconds
     Fin de la ejecución.
     ##########################################################
-    # Ejercicio 4
+    # Parte 4
     ##########################################################
     Búsqueda en profundidad usando grafo.
     Se procede a cancelar su ejecución por entrar en bucle infinito.
-    
+
 
 ---
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
 ---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+---
+
+
+
+---
+
+
+---
+
+
+---
+
+
 ---
 
 
 ## Exposición de los datos obtenidos.
 
 Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso.
-Se descarta directamente `Búsqueda en profundidad usando grafo` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
+Se descarta directamente `Búsqueda en profundidad usando árbol` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
 
 | | **Búsqueda en anchura usando árbol** | <span style="color:red">**Búsqueda en anchura usando grafo**</span> | **Búsqueda en profundidad usando grafo** |
 | --- | --- | --- | --- |
 | Nodos expandidos | ***1684758*** | 1685223 | 1685359 |
 | Profundidad de la solución | ***9*** | ***9*** | 128 |
-| Memoria usada finalmente | 70.35 MB | ***69.51 MB*** | ***69.51 MB*** |
-| Tiempo de ejecución de CPU | 20.234375 seconds | 0.015625 seconds | ***0.000000 seconds*** | 
+| Memoria usada finalmente | 100.46 MB | ***99.54 MB*** | ***99.54 MB*** |
+| Tiempo de ejecución de CPU | 15.275921 seconds | *0.014522 seconds* | ***0.007187 seconds*** | 
 
 Cabe destacar de los datos obtenidos las siguientes reflexiones:
 

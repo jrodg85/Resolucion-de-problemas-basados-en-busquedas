@@ -1,27 +1,42 @@
 # Resolución de problemas basados en búsquedas
 
-## Tarea 2: Números
+## Tarea 3: 8 puzzle
 
-En esta tarea es necesario que utilices el código de la tarea 1. Crea un problema cuyos estados sean números de tres cifras y las posibles acciones sean sumar o restar una unidad a alguna de las cifras (+1, +10, +100, -1, -10, -100).
+En esta tarea es necesario que utilices el código de la tarea 1 para implementar el problema del 8-puzzle.
 
-El problema en concreto tendrá una serie de números tabú que deberían de ser imposibles de alcanzar.
+El objetivo de esta tarea es que compruebes como se comporta el algoritmo de búsqueda en anchura en cuanto a la profundidad. Para ello es necesario que definas varios estados iniciales cuya solución se encuentre a distintas profundidades.
 
-Es decir, la definición del problema es la siguiente:
+Entregables:
 
-Estado inicial: 789
-Estado Objetivo: 269
-Números tabú: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
-Acciones: +1, +10, +100, -1, -10, -100
-
+- El código con la implementación
+- Un documento pdf donde se incluya:
+- Estados iniciales que se encuentran a una profundidad de 1, 2, 3, 4 y 5 del nodo objetivo.
+- Se tomen las métricas de tiempos de consumo y de memoria para la búsqueda de primero en anchura para los estados iniciales definidos utilizando árboles.
+- Lo mismo que el punto anterior pero utilizando grafos en lugar de árboles.
 
 ## Solución
 
-La tarea a ejecutar es dado un numero inicial A menor que 1000 y mayor que 99, mediante las operaciones (-100, -10, -1, +1, +10, +100) debe de llegar a un numero B objetivo menor que 1000 y mayor que 99 objetivo.
+La tarea a ejecutar es dado un inicial aleatoria, la posición final mediante intercambio de números entre si por parte del 0 tiene que ser (1,2,3,4,5,6,7,8,0).
 
-En este caso el A= 789, B=269
-No se puede llegar a los siguientes numeros: 244, 253, 254, 343, 344, 353, 778, 779, 679, 689
+Tal y como pide el enunciado, se realizará con estados iniciales en los que la profundidad sea 1, 2, 3, 4 y 5 con el nodo objetivo.
 
-Se va a proceder a modificar el código para que los 4 posibles búsquedas las haga a la vez y se muestre en el código una vez ejecutado. Para ello se pondrá un for in range 4. Se añadirán cabeceras para separar cada uno de los resultados
+Ya que puede haber combinaciones por del 8 puzzle que no tengan solución, para tener una profundidad idónea, se procede a usar el siguiente repositorio de github (https://github.com/NiharG15/8-Puzzle) para poder realizar ejercicios de profundidad 1 2 3 4 y 5.
+
+- Profundidad 1: (1,2,3,4,5,0,7,8,6)
+- Profundidad 2: (1,2,3,4,0,6,7,5,8)
+- Profundidad 3: (1,2,3,0,5,6,4,7,8)
+- Profundidad 4: (1,3,0,4,2,5,7,8,6)
+- Profundidad 5: (2,0,3,1,4,6,7,5,8)
+
+En el caso que nos trata, deberemos de realizar la misma acción en las 5 profundidades los cuatro métodos.
+Para no estar re-escribiendo el código de manera repetitiva. A continuación se mostrará el código, donde se cambiará las ultimas lineas para aplicar uno u otro método y la 'variable `initial_state` según lo anteriormente explicado, por otro lado se descimentará y comentará lo interesado según el método a usar. en el main.
+En el código se mostrar será el utilizado para **Búsqueda en anchura usando árbol** y ***Profundidad 1 (1,2,3,4,5,0,7,8,6)***.
+
+Para el estudio comparativo entre distintos métodos usaré un estado de profundidad 15
+
+- Profundidad 15: (1,0,8,5,2,3,4,7,6)
+
+
 
 
 ```python
@@ -47,7 +62,7 @@ def humanbytes(B: int) -> str:
     TB = float(KB ** 4)  # 1,099,511,627,776
 
     if B < KB:
-        return '{0} {1}'.format(B, 'Bytes' if 0 == B > 1 else 'Byte')
+        return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
     elif KB <= B < MB:
         return '{0:.2f} KB'.format(B / KB)
     elif MB <= B < GB:
@@ -113,7 +128,6 @@ class Problem:
 
 class Statistics(object):
     amount = 0
-
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(Statistics, cls).__new__(cls)
@@ -283,189 +297,821 @@ def breadth_first_graph_search(problem):
 
 
 class Invented(Problem):
-    """
-    Example of implementation of the problem.
-    The states are two digits (from 10 to 99)
-    The actions is to add or subtract some digit (+1, -1, +10, -10)
-    """
 
-    def __init__(self, initial=789, goal=269):
-        """ Define goal state and initialize a problem """
-        super().__init__(initial, goal)
+    def __init__(self, initial_state= (1,2,3,4,5,0,7,8,6), goal_state= (1, 2, 3, 4, 5, 6, 7, 8, 0)):
+        """
+        Inicializa una instancia del problema del 8 puzzle.
+        :param initial_state: El estado inicial del problema.
+        :param goal_state: El estado objetivo del problema.
+        """
+        super().__init__(initial_state, goal_state)
 
     def actions(self, state):
-        """ Return the actions that can be executed in the given state.
-        The result would be a list, since there are only four possible actions
-        in any given state of the environment """
+        """
+        Devuelve las acciones legales desde el estado `state`.
+        :param state: El estado actual.
+        :return: Lista de acciones legales desde el estado actual.
+        """
+        actions = []
+        empty_pos = state.index(0)  # posición del hueco
 
-        actions = [1, 10, 100, -1, -10, -100]
-        tabu = [244, 253, 254, 343, 344, 353, 778, 779, 679, 689]
-        possible_actions = []
+        if empty_pos % 3 > 0:
+            actions.append('left')
+        if empty_pos % 3 < 2:
+            actions.append('right')
+        if empty_pos // 3 > 0:
+            actions.append('up')
+        if empty_pos // 3 < 2:
+            actions.append('down')
 
-        for action in actions:
-            tmp = state + action
-            if 100 <= tmp <= 999 and tmp not in tabu:
-                possible_actions.append(action)
-
-        return possible_actions
+        return actions
 
     def result(self, state, action):
-        """ Given state and action, return a new state that is the result of the action.
-        Action is assumed to be a valid action in the state """
-        return state + action
+        """
+        Devuelve el estado resultante de aplicar la acción `action` en el estado `state`.
+        :param state: El estado actual.
+        :param action: La acción a aplicar.
+        :return: El estado resultante de aplicar la acción.
+        """
+        new_state = list(state)  # Hacemos una copia del estado actual
+        empty_pos = state.index(0)  # posición del hueco
+
+        if action == 'left':
+            new_pos = empty_pos - 1
+        elif action == 'right':
+            new_pos = empty_pos + 1
+        elif action == 'up':
+            new_pos = empty_pos - 3
+        elif action == 'down':
+            new_pos = empty_pos + 3
+
+        # Intercambiamos el valor en la posición `empty_pos` con el valor en la posición `new_pos`
+        new_state[empty_pos], new_state[new_pos] = new_state[new_pos], new_state[empty_pos]
+
+        return tuple(new_state)
 
     def goal_test(self, state):
-        """ Given a state, return True if state is a goal state or False, otherwise """
-
+        """
+        Determina si el estado `state` es un estado objetivo.
+        :param state: El estado a comprobar.
+        :return: True si el estado es un estado objetivo, False en caso contrario.
+        """
         return state == self.goal
 
 
 if __name__ == '__main__':
-    for i in range(3):
-        process = psutil.Process(os.getpid())
-        print('\nMemory usage initially: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-    
-        problem: Problem = Invented()
-    
-        start = time.process_time()
-        # Refers to the ime the CPU was busy processing the program’s instructions.
-        # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
-        if i==0:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = breadth_first_tree_search(problem)
-        if i==1:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = breadth_first_graph_search(problem)
-        if i==2:
-            print("############################################")
-            print("Parte ", i+1)
-            print("############################################")
-            solution: Optional[Node] = depth_first_graph_search(problem)
-        #if i==3:
-            #print("############################################")
-            #print("Parte ", i+1)
-            #print("############################################")
-            #solution: Optional[Node] = depth_first_tree_search(problem)
-        elapsed = time.process_time() - start
-    
-        if solution is not None:
-            print("Nodos expandidos: ", Statistics().get_amount())
-            print("Profundidad de la solucion: ", solution.depth)
-            print("Nodos:", solution.path(), sep='\n\t')
-            print("Acciones:", solution.solution(), sep='\n\t')
-    
-        print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
-        print('CPU Execution time: %.6f seconds' % elapsed)
-    print("Fin de la ejecución.")
+    process = psutil.Process(os.getpid())
+    print('\nMemory usage initially: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
 
+    problem: Problem = Invented()
 
-        
-    print("##########################################################")
-    print("# Ejercicio 4")
-    print("##########################################################")
-        
-    print("Búsqueda en profundidad usando grafo.")
-    print("Se procede a cancelar su ejecución por entrar en bucle infinito.")
+    start = time.process_time()
+    # Refers to the ime the CPU was busy processing the program’s instructions.
+    # The time spent waiting for other task to complete (like I/O operations) is not included in the CPU time.
+    solution: Optional[Node] = breadth_first_tree_search(problem)
+    #solution: Optional[Node] = breadth_first_graph_search(problem)
+    #solution: Optional[Node] = depth_first_graph_search(problem)
+    #solution: Optional[Node] = depth_first_tree_search(problem)
+    elapsed = time.process_time() - start
+
+    if solution is not None:
+        print("Nodos expandidos: ", Statistics().get_amount())
+        print("Profundidad de la solución: ", solution.depth)
+        print("Nodos:", solution.path(), sep='\n\t')
+        print("Acciones:", solution.solution(), sep='\n\t')
+
+    print('\nMemory usage finally: %s (%.2f%%)\n' % (humanbytes(process.memory_info().rss), process.memory_percent() ) )
+    print('CPU Execution time: %.6f seconds' % elapsed)
+
 ```
+~~~
 
-    
-    Memory usage initially: 66.16 MB (0.21%)
-    
-    ############################################
-    Parte  1
-    ############################################
-    Nodos expandidos:  1684758
-    Profundidad de la solucion:  9
-    Nodos:
-    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
-    Acciones:
-    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
-    
-    Memory usage finally: 70.35 MB (0.22%)
-    
-    CPU Execution time: 20.234375 seconds
-    
-    Memory usage initially: 70.35 MB (0.22%)
-    
-    ############################################
-    Parte  2
-    ############################################
-    Nodos expandidos:  1685223
-    Profundidad de la solucion:  9
-    Nodos:
-    	[<Node 789>, <Node 790>, <Node 780>, <Node 770>, <Node 769>, <Node 669>, <Node 569>, <Node 469>, <Node 369>, <Node 269>]
-    Acciones:
-    	[1, -10, -10, -1, -100, -100, -100, -100, -100]
-    
-    Memory usage finally: 69.51 MB (0.22%)
-    
-    CPU Execution time: 0.015625 seconds
-    
-    Memory usage initially: 69.51 MB (0.22%)
-    
-    ############################################
-    Parte  3
-    ############################################
-    Nodos expandidos:  1685359
-    Profundidad de la solucion:  128
-    Nodos:
-    	[<Node 789>, <Node 788>, <Node 688>, <Node 588>, <Node 488>, <Node 388>, <Node 288>, <Node 188>, <Node 178>, <Node 168>, <Node 158>, <Node 148>, <Node 138>, <Node 128>, <Node 118>, <Node 108>, <Node 107>, <Node 106>, <Node 105>, <Node 104>, <Node 103>, <Node 102>, <Node 101>, <Node 100>, <Node 200>, <Node 190>, <Node 180>, <Node 170>, <Node 160>, <Node 150>, <Node 140>, <Node 130>, <Node 120>, <Node 220>, <Node 219>, <Node 209>, <Node 309>, <Node 299>, <Node 399>, <Node 499>, <Node 599>, <Node 699>, <Node 709>, <Node 708>, <Node 608>, <Node 508>, <Node 408>, <Node 407>, <Node 307>, <Node 297>, <Node 197>, <Node 196>, <Node 186>, <Node 176>, <Node 166>, <Node 156>, <Node 146>, <Node 136>, <Node 126>, <Node 125>, <Node 124>, <Node 123>, <Node 122>, <Node 222>, <Node 212>, <Node 211>, <Node 311>, <Node 301>, <Node 291>, <Node 281>, <Node 271>, <Node 261>, <Node 251>, <Node 241>, <Node 231>, <Node 331>, <Node 330>, <Node 329>, <Node 328>, <Node 327>, <Node 227>, <Node 217>, <Node 216>, <Node 215>, <Node 214>, <Node 314>, <Node 304>, <Node 294>, <Node 194>, <Node 184>, <Node 174>, <Node 164>, <Node 154>, <Node 144>, <Node 143>, <Node 243>, <Node 233>, <Node 333>, <Node 323>, <Node 423>, <Node 413>, <Node 403>, <Node 393>, <Node 383>, <Node 283>, <Node 273>, <Node 263>, <Node 363>, <Node 362>, <Node 352>, <Node 342>, <Node 442>, <Node 432>, <Node 532>, <Node 522>, <Node 512>, <Node 502>, <Node 492>, <Node 482>, <Node 472>, <Node 471>, <Node 461>, <Node 451>, <Node 450>, <Node 350>, <Node 349>, <Node 249>, <Node 259>, <Node 269>]
-    Acciones:
-    	[-1, -100, -100, -100, -100, -100, -100, -10, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, -1, -1, -1, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -10, 100, -10, 100, 100, 100, 100, 10, -1, -100, -100, -100, -1, -100, -10, -100, -1, -10, -10, -10, -10, -10, -10, -10, -1, -1, -1, -1, 100, -10, -1, 100, -10, -10, -10, -10, -10, -10, -10, -10, 100, -1, -1, -1, -1, -100, -10, -1, -1, -1, 100, -10, -10, -100, -10, -10, -10, -10, -10, -1, 100, -10, 100, -10, 100, -10, -10, -10, -10, -100, -10, -10, 100, -1, -10, -10, 100, -10, 100, -10, -10, -10, -10, -10, -10, -1, -10, -10, -1, -100, -1, -100, 10, 10]
-    
-    Memory usage finally: 69.51 MB (0.22%)
-    
-    CPU Execution time: 0.000000 seconds
-    Fin de la ejecución.
-    ##########################################################
-    # Ejercicio 4
-    ##########################################################
-    Búsqueda en profundidad usando grafo.
-    Se procede a cancelar su ejecución por entrar en bucle infinito.
-    
+#######################################################
+Profundidad 1
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 61.01 MB (0.38%)
+
+Nodos expandidos:  3
+
+Profundidad de la solución:  1
+
+Nodos:
+	[<Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down']
+
+Memory usage finally: 61.01 MB (0.38%)
+
+CPU Execution time: 0.000072 seconds
+
+#######################################################
+Profundidad 2
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 61.02 MB (0.38%)
+
+Nodos expandidos:  15
+
+Profundidad de la solución:  2
+
+Nodos:
+	[<Node (1, 2, 3, 4, 0, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'right']
+
+Memory usage finally: 61.02 MB (0.38%)
+
+CPU Execution time: 0.000139 seconds
+
+#######################################################
+Profundidad 3
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 60.99 MB (0.38%)
+
+Nodos expandidos:  31
+
+Profundidad de la solución:  3
+
+Nodos:
+	[<Node (1, 2, 3, 0, 5, 6, 4, 7, 8)>, <Node (1, 2, 3, 4, 5, 6, 0, 7, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'right', 'right']
+
+Memory usage finally: 60.99 MB (0.38%)
+
+CPU Execution time: 0.000175 seconds
+
+#######################################################
+Profundidad 4
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 61.02 MB (0.38%)
+
+Nodos expandidos:  42
+
+Profundidad de la solución:  4
+
+Nodos:
+	[<Node (1, 3, 0, 4, 2, 5, 7, 8, 6)>, <Node (1, 0, 3, 4, 2, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 0, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['left', 'down', 'right', 'down']
+
+Memory usage finally: 61.02 MB (0.38%)
+
+CPU Execution time: 0.000370 seconds
+
+#######################################################
+Profundidad 5
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 61.00 MB (0.38%)
+
+Nodos expandidos:  134
+
+Profundidad de la solución:  5
+
+Nodos:
+	[<Node (2, 0, 3, 1, 4, 6, 7, 5, 8)>, <Node (0, 2, 3, 1, 4, 6, 7, 5, 8)>, <Node (1, 2, 3, 0, 4, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 0, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['left', 'down', 'right', 'down', 'right']
+
+Memory usage finally: 61.00 MB (0.38%)
+
+CPU Execution time: 0.000717 seconds
+
+#######################################################
+Profundidad 15
+Búsqueda en anchura usando árbol
+#######################################################
+
+Memory usage initially: 61.13 MB (0.38%)
+
+Nodos expandidos:  6874757
+
+Profundidad de la solución:  15
+
+Nodos:
+	[<Node (1, 0, 8, 5, 2, 3, 4, 7, 6)>, <Node (1, 2, 8, 5, 0, 3, 4, 7, 6)>, <Node (1, 2, 8, 0, 5, 3, 4, 7, 6)>, <Node (0, 2, 8, 1, 5, 3, 4, 7, 6)>, <Node (2, 0, 8, 1, 5, 3, 4, 7, 6)>, <Node (2, 8, 0, 1, 5, 3, 4, 7, 6)>, <Node (2, 8, 3, 1, 5, 0, 4, 7, 6)>, <Node (2, 8, 3, 1, 0, 5, 4, 7, 6)>, <Node (2, 0, 3, 1, 8, 5, 4, 7, 6)>, <Node (0, 2, 3, 1, 8, 5, 4, 7, 6)>, <Node (1, 2, 3, 0, 8, 5, 4, 7, 6)>, <Node (1, 2, 3, 4, 8, 5, 0, 7, 6)>, <Node (1, 2, 3, 4, 8, 5, 7, 0, 6)>, <Node (1, 2, 3, 4, 0, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'left', 'up', 'right', 'right', 'down', 'left', 'up', 'left', 'down', 'down', 'right', 'up', 'right', 'down']
+
+Memory usage finally: 105.14 MB (0.66%)
+
+CPU Execution time: 37.727990 seconds
+
+#######################################################
+Profundidad 1
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 61.13 MB (0.38%)
+
+Nodos expandidos:  1
+
+Profundidad de la solución:  1
+
+Nodos:
+	[<Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down']
+
+Memory usage finally: 60.96 MB (0.38%)
+
+CPU Execution time: 0.000128 seconds
+
+#######################################################
+Profundidad 2
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 61.09 MB (0.38%)
+
+Nodos expandidos:  5
+
+Profundidad de la solución:  2
+
+Nodos:
+	[<Node (1, 2, 3, 4, 0, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'right']
+
+Memory usage finally: 61.09 MB (0.38%)
+
+CPU Execution time: 0.000096 seconds
+
+#######################################################
+Profundidad 3
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 61.04 MB (0.38%)
+
+Nodos expandidos:  9
+
+Profundidad de la solución:  3
+
+Nodos:
+	[<Node (1, 2, 3, 0, 5, 6, 4, 7, 8)>, <Node (1, 2, 3, 4, 5, 6, 0, 7, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'right', 'right']
+
+Memory usage finally: 61.04 MB (0.38%)
+
+CPU Execution time: 0.000119 seconds
+
+#######################################################
+Profundidad 4
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 60.99 MB (0.38%)
+
+Nodos expandidos:  10
+
+Profundidad de la solución:  4
+
+Nodos:
+	[<Node (1, 3, 0, 4, 2, 5, 7, 8, 6)>, <Node (1, 0, 3, 4, 2, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 0, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['left', 'down', 'right', 'down']
+
+Memory usage finally: 60.99 MB (0.38%)
+
+CPU Execution time: 0.000119 seconds
+
+#######################################################
+Profundidad 5
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 61.11 MB (0.38%)
+
+Nodos expandidos:  22
+
+Profundidad de la solución:  5
+
+Nodos:
+	[<Node (2, 0, 3, 1, 4, 6, 7, 5, 8)>, <Node (0, 2, 3, 1, 4, 6, 7, 5, 8)>, <Node (1, 2, 3, 0, 4, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 0, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['left', 'down', 'right', 'down', 'right']
+
+Memory usage finally: 61.11 MB (0.38%)
+
+CPU Execution time: 0.000323 seconds
+
+#######################################################
+Profundidad 15
+Búsqueda en anchura usando grafo
+#######################################################
+
+Memory usage initially: 61.04 MB (0.38%)
+
+Nodos expandidos:  4361
+
+Profundidad de la solución:  15
+
+Nodos:
+	[<Node (1, 0, 8, 5, 2, 3, 4, 7, 6)>, <Node (1, 2, 8, 5, 0, 3, 4, 7, 6)>, <Node (1, 2, 8, 0, 5, 3, 4, 7, 6)>, <Node (0, 2, 8, 1, 5, 3, 4, 7, 6)>, <Node (2, 0, 8, 1, 5, 3, 4, 7, 6)>, <Node (2, 8, 0, 1, 5, 3, 4, 7, 6)>, <Node (2, 8, 3, 1, 5, 0, 4, 7, 6)>, <Node (2, 8, 3, 1, 0, 5, 4, 7, 6)>, <Node (2, 0, 3, 1, 8, 5, 4, 7, 6)>, <Node (0, 2, 3, 1, 8, 5, 4, 7, 6)>, <Node (1, 2, 3, 0, 8, 5, 4, 7, 6)>, <Node (1, 2, 3, 4, 8, 5, 0, 7, 6)>, <Node (1, 2, 3, 4, 8, 5, 7, 0, 6)>, <Node (1, 2, 3, 4, 0, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'left', 'up', 'right', 'right', 'down', 'left', 'up', 'left', 'down', 'down', 'right', 'up', 'right', 'down']
+
+Memory usage finally: 62.68 MB (0.39%)
+
+CPU Execution time: 1.019572 seconds
+
+#######################################################
+Profundidad 1
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 61.02 MB (0.38%)
+
+Nodos expandidos:  1
+
+Profundidad de la solución:  1
+
+Nodos:
+	[<Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down']
+
+Memory usage finally: 61.03 MB (0.38%)
+
+CPU Execution time: 0.000068 seconds
+
+#######################################################
+Profundidad 2
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 60.99 MB (0.38%)
+
+Nodos expandidos:  2
+
+Profundidad de la solución:  2
+
+Nodos:
+	[<Node (1, 2, 3, 4, 0, 6, 7, 5, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 0, 8)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'right']
+
+Memory usage finally: 60.99 MB (0.38%)
+
+CPU Execution time: 0.000110 seconds
+
+#######################################################
+Profundidad 3
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 61.22 MB (0.38%)
+
+Proceso interrumpido tras mas de 2 minutos de proceso... se considera que no encuentra la solución.
+
+#######################################################
+Profundidad 4
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 61.09 MB (0.38%)
+
+Nodos expandidos:  30
+
+Profundidad de la solución:  30
+
+Nodos:
+	[<Node (1, 3, 0, 4, 2, 5, 7, 8, 6)>, <Node (1, 3, 5, 4, 2, 0, 7, 8, 6)>, <Node (1, 3, 5, 4, 2, 6, 7, 8, 0)>, <Node (1, 3, 5, 4, 2, 6, 7, 0, 8)>, <Node (1, 3, 5, 4, 0, 6, 7, 2, 8)>, <Node (1, 0, 5, 4, 3, 6, 7, 2, 8)>, <Node (1, 5, 0, 4, 3, 6, 7, 2, 8)>, <Node (1, 5, 6, 4, 3, 0, 7, 2, 8)>, <Node (1, 5, 6, 4, 3, 8, 7, 2, 0)>, <Node (1, 5, 6, 4, 3, 8, 7, 0, 2)>, <Node (1, 5, 6, 4, 0, 8, 7, 3, 2)>, <Node (1, 0, 6, 4, 5, 8, 7, 3, 2)>, <Node (1, 6, 0, 4, 5, 8, 7, 3, 2)>, <Node (1, 6, 8, 4, 5, 0, 7, 3, 2)>, <Node (1, 6, 8, 4, 5, 2, 7, 3, 0)>, <Node (1, 6, 8, 4, 5, 2, 7, 0, 3)>, <Node (1, 6, 8, 4, 0, 2, 7, 5, 3)>, <Node (1, 0, 8, 4, 6, 2, 7, 5, 3)>, <Node (1, 8, 0, 4, 6, 2, 7, 5, 3)>, <Node (1, 8, 2, 4, 6, 0, 7, 5, 3)>, <Node (1, 8, 2, 4, 6, 3, 7, 5, 0)>, <Node (1, 8, 2, 4, 6, 3, 7, 0, 5)>, <Node (1, 8, 2, 4, 0, 3, 7, 6, 5)>, <Node (1, 0, 2, 4, 8, 3, 7, 6, 5)>, <Node (1, 2, 0, 4, 8, 3, 7, 6, 5)>, <Node (1, 2, 3, 4, 8, 0, 7, 6, 5)>, <Node (1, 2, 3, 4, 8, 5, 7, 6, 0)>, <Node (1, 2, 3, 4, 8, 5, 7, 0, 6)>, <Node (1, 2, 3, 4, 0, 5, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down', 'down', 'left', 'up', 'up', 'right', 'down', 'down', 'left', 'up', 'up', 'right', 'down', 'down', 'left', 'up', 'up', 'right', 'down', 'down', 'left', 'up', 'up', 'right', 'down', 'down', 'left', 'up', 'right', 'down']
+
+Memory usage finally: 61.09 MB (0.38%)
+
+CPU Execution time: 0.000282 seconds
+
+#######################################################
+Profundidad 5
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 61.11 MB (0.38%)
+
+Nodos expandidos:  330
+
+Profundidad de la solución:  323
+
+Nodos: Se descartan para la presentación.
+
+Acciones: Se descartan para la presentación.
+
+Memory usage finally: 61.11 MB (0.38%)
+
+CPU Execution time: 0.009761 seconds
+
+
+#######################################################
+Profundidad 15
+Búsqueda en profundidad usando grafo
+#######################################################
+
+Memory usage initially: 61.06 MB (0.38%)
+
+Nodos expandidos:  46201
+
+Profundidad de la solución:  42387
+
+Nodos: Se descartan para la presentación.
+
+Acciones: Se descartan para la presentación.
+
+Memory usage finally: 86.67 MB (0.54%)
+
+CPU Execution time: 130.345431 seconds
+
+
+#######################################################
+Profundidad 1
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Memory usage initially: 61.21 MB (0.38%)
+
+Nodos expandidos:  1
+
+Profundidad de la solución:  1
+
+Nodos:
+	[<Node (1, 2, 3, 4, 5, 0, 7, 8, 6)>, <Node (1, 2, 3, 4, 5, 6, 7, 8, 0)>]
+
+Acciones:
+	['down']
+
+Memory usage finally: 61.21 MB (0.38%)
+
+CPU Execution time: 0.000060 seconds
+
+#######################################################
+Profundidad 2
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Proceso "killed" por excesivo consumo de RAM.
+
+#######################################################
+Profundidad 3
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Proceso "killed" por excesivo consumo de RAM.
+
+#######################################################
+Profundidad 4
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Proceso "killed" por excesivo consumo de RAM.
+
+#######################################################
+Profundidad 5
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Proceso "killed" por excesivo consumo de RAM.
+
+#######################################################
+Profundidad 15
+Búsqueda en profundidad usando árbol
+#######################################################
+
+Proceso "killed" por excesivo consumo de RAM.
+
+~~~
 
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
 ---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+
+
 
 
 ## Exposición de los datos obtenidos.
 
-Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso.
-Se descarta directamente `Búsqueda en profundidad usando grafo` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
+A continuación, se procede a realizar una tabla comparativa de cada uno de los procesos de búsqueda según su profundidad.
+
+### **Búsqueda en anchura usando árbol**
+
+| | **Profundidad 1** | **Profundidad 2** | **Profundidad 3** | **Profundidad 4** | **Profundidad 5** | **Profundidad 15** |
+| --- | --- | --- | --- | --- | ---| ---|
+| Nodos expandidos | 3 | 15 | 32 | 43 | 134 | 6874757 |
+| Profundidad de la solución | 1 | 2 | 3 | 4 | 5 | 15 |
+| Memoria usada finalmente | 61.01 MB | 61.02 MB | 60.99 MB | 61.02 MB | 61.00 MB | 105.14 MB |
+| Tiempo de ejecución de CPU | 0.000072 seconds |  0.000139 seconds | 0.000175 seconds | 0.000370 seconds | 0.000717 seconds | 37.727990 seconds  |
+
+
+### **Búsqueda en anchura usando grafo**
+
+| | **Profundidad 1** | **Profundidad 2** | **Profundidad 3** | **Profundidad 4** | **Profundidad 5** | **Profundidad 15** |
+| --- | --- | --- | --- | --- | ---| ---|
+| Nodos expandidos | 1 | 5 | 9 | 10 | 22 | 4361 |
+| Profundidad de la solución | 1 | 2 | 3 | 4 | 5 | 15 |
+| Memoria usada finalmente | 60.96 MB | 61.09 MB | 61.04 MB | 60.99 MB | 61.11 MB | 62.68 MB |
+| Tiempo de ejecución de CPU | 0.000128 seconds | 0.000096 seconds | 0.000119 seconds | 0.000119 seconds | 0.000323 seconds | 1.019572 seconds |
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+
+### **Búsqueda en profundidad usando grafo**
+
+| | **Profundidad 1** | **Profundidad 2** | **Profundidad 4** | **Profundidad 5** | **Profundidad 15** |
+| --- | --- | --- | --- | ---| ---|
+| Nodos expandidos | 1 | 2 | 30 | 330 | 46201 |
+| Profundidad de la solución | 1 | 2 | 30 | 323 | 42387 |
+| Memoria usada finalmente | 61.03 MB | 60.99 MB | 61.09 MB | 61.11 MB | 86.67 MB |
+| Tiempo de ejecución de CPU | 0.000068 second | 0.000110 seconds | 0.000282 seconds | 0.009761 seconds | 130.345431 seconds |
+
+El proceso en profundidad 3 se ha descartado tras estar mas de 2 minutos ejecutándose, dando por "killed" el proceso.
+
+
+### **Búsqueda en profundidad usando árbol**
+
+| | **Profundidad 1** |
+| --- | --- |
+| Nodos expandidos | 1 |
+| Profundidad de la solución | 1 |
+| Memoria usada finalmente | 61.21 MB |
+| Tiempo de ejecución de CPU | 0.000060 seconds |
+
+En los procesos en profundidad 2,3,4,5 y 15 se ha procedido a hacer "kill" en su ejecución debido al excesivo consumo de RAM que estaban produciendo.
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+
+## Comparación entre modelos de búsqueda.
+
+Se procede a realizar una tabla comparativa para ver cual es el mejor modelo de trabajo para este caso usando la profundidad 15.
+Se descarta directamente `Búsqueda en profundidad usando árbol` debido a que este proceso ha entrado en **bucle infinito** y por tanto su funcionalidad para este caso es nula.
 
 | | **Búsqueda en anchura usando árbol** | <span style="color:red">**Búsqueda en anchura usando grafo**</span> | **Búsqueda en profundidad usando grafo** |
 | --- | --- | --- | --- |
-| Nodos expandidos | ***1684758*** | 1685223 | 1685359 |
-| Profundidad de la solución | ***9*** | ***9*** | 128 |
-| Memoria usada finalmente | 70.35 MB | ***69.51 MB*** | ***69.51 MB*** |
-| Tiempo de ejecución de CPU | 20.234375 seconds | 0.015625 seconds | ***0.000000 seconds*** | 
+| Nodos expandidos | 6874757 | **4361** | 46201 |
+| Profundidad de la solución | **15** | **15** | 42387 |
+| Memoria usada finalmente | 105.14 MB | **62.68 MB** | 86.67 MB |
+| Tiempo de ejecución de CPU | 37.727990 seconds | **1.019572 seconds** | 130.345431 seconds |
 
-Cabe destacar de los datos obtenidos las siguientes reflexiones:
+Cabe destacar de los datos obtenidos la siguiente reflexión:
 
-- Se puede indicar en lo relativo a los nodos expandidos ya que el ahorro de nodos expandidos entre la opción mas optima y la menos optima en este campo de estudio, es solo de un **0.0357%**. Por lo que esta opción como decisiva para su elección no se considera la mas decisiva.
-- Relativo al apartado de la profundidad de la solución, pasa lo contrario que en el apartado anterior, ya que el método de `Búsqueda en profundidad usando grafo` utiliza 3 veces mas la profundidad de la solución que los otros dos métodos, este campo de estudio se puede considerar determinante ya que la diferencia del menos con el mayor es de mas de **1433%**, quedando la  opción de `Búsqueda en profundidad usando grafo` como **DESCARTADA**.
-- Relativo a la memoria utilizada finalmente ocurre algo parecido como en los nodos expandidos, la diferencia es que en vez de ser del 0.1955%, en este caso es del **1.2085%** siendo de esta manera un poco mas determinante a la opción entre elegir `Búsqueda en anchura usando grafo` o `Búsqueda en anchura usando árbol`. 
-- A modo de re-afirmación, se puede concluir que el tiempo de ejecución diferenciando entre `Búsqueda en anchura usando árbol` y `Búsqueda en anchura usando grafo`, cabe destacar que en `Búsqueda en anchura usando árbol` usa muchísimo mas tiempo de ejecución que `Búsqueda en anchura usando grafo`.
-
-
+El tipo de búsqueda mas efectivo, aun desconociendo el coste tanto en Nodos expandidos, profundidad de la solución, memoria utilizada finalmente, como tiempo de ejecución en su búsqueda, es ´***Búsqueda en anchura usando grafo***´. Se puede destacar que `Búsqueda en anchura usando árbol` encuentra de la misma manera la solución mas efectiva, pero realizando un mayor consumo en tiempo, nodos expandidos y memoria.
 
 ---
 
